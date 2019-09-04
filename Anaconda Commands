@@ -1,0 +1,5 @@
+不要安装到base中，需要安装到quant中
+activate quant
+pip install mpl_finance
+conda list #检查是否安装成功
+
