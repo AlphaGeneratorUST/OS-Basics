@@ -1,0 +1,3 @@
+# 查看现有conda环境中packages的信息
+conda info --envs
+activate quant
