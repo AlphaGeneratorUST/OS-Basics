@@ -1,0 +1,28 @@
+Cython的基本知识
+
+1）基本概念：
+常规Python函数，运行时间559 ns
+Cython def函数，声明一个Python函数，既可以在模块内调用，也可以在模块外调用。模块内运行时间524.2 ns，模块外运行时间512 ns：
+%%cython
+def f1(x):
+    return x ** 2 - x
+    
+Cython cpdef函数，声明一个C函数和一个Python wrapper，在模块内被当做C函数调用，在模块外被.py文件当做Python函数调用。模块内运行时间43.7 ns，模块外运行时间81.7 ns:
+%%cython
+cpdef long f1(long x):
+    return x ** 2 - x
+    
+Cython cdef函数，声明一个C函数，不可以在模块外被Python调用。模块内运行时间34.8 ns
+%%cython
+cdef long f1(long x):
+    return x ** 2 - x
+
+2) 使用C标准库替代Python的math模块：
+cdef extern from "math.h":
+    float cosf(float theta)
+    float sinf(float theta)
+    float acosf(float theta)
+    
+3) Cython编译：
+对于Windows系统，.pyx -> .pyd
+转换动态类型的Python版本为静态类型的Cython版本
