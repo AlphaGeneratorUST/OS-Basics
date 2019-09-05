@@ -1,0 +1,42 @@
+Python Numba的基本用法
+Python太动态了，事先编译一下静态一点
+Cython
+Numba
+
+1）使用jit加速Python低效的for语句：
+numba不支持list comprehensions
+import numba as nb
+@nb.jit(nopython=True)
+
+2) 使用vectorize实现numpy的ufunc功能:
+@nb.vectorize(nopython=True)
+vectorize下的函数所接受的参数都是一个个的数，而不是整个数组
+可以显示地定义函数的参数类型：
+@nb.vectorize("float32(float32, int32)", nopython=True)
+@nb.vectorize([
+    "float32(float32, int32)",
+    "float32(float32, float32)"
+    ], nopython=True)
+
+vectorize可以“并行”：参数target一共有三种取值（cpu/parallel/cuda）, 1KB, 1MB, >1MB
+@nb.vectorize("float32(float32, float32)", target="parellel", nopython=True)
+
+3) 使用jit(nogil=True)实现高效并发（多线程）：
+GIL, Global Interpreter Lock，全局解释器锁，即使在多核心处理器上，使用GIL的解释器也只允许同一时间执行一个执行绪，常用的有CPython和Ruby MRI.
+from concurrent.futures import ThreadPoolExecutor
+@nb.jit(nopython=True, nogil=True)
+def make_multi_task(kernel, n_thread):
+    def func(length, *args):
+        result = np.empty(length, dtype=np.float32)
+        args = (result,) + args
+        # 将每个线程接受的参数定义好
+        chunk_size = (length + n_thread - 1)
+        chunks = [[arg[i*chunk_size:(i+1)*chunk_size] for i in range(n_thread)] for i in range(n_thread)] for arg in args]
+        # 利用ThreadPoolExecutor进行并发
+        with ThreadPoolExecutor(max_workers=n_thread) as e:
+            for _ in e.map(kernel, *chunks):
+                pass
+        return result
+     return func
+     
+     
