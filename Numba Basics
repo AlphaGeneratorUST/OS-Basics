@@ -1,14 +1,21 @@
 Python Numba的基本用法
 Python太动态了，事先编译一下静态一点
+LLVM compiler: language-independent intermediate representation, written in C++， compile-time, link-time, run-time and "idle-time" optimization
+核心应用领域：math-heavy, array-oriented，加快面向数组的计算
+只能使用numpy和标准库的函数来加快numba速度
+可以将pandas中处理数据的for循环作为单独的函数提出来，再使用Numba加速
+Numba库提供的是一种懒编译（Lazy Compilation）技术，用到的时候才编译
+Python速度慢的另一个重要原因是变量类型不确定，需要解释器进行大量的类型推断，对此Numba给出了Eager Compilation的优化技术
+Numba使用了LLVM和NVVM技术，将Python、Julia这样的解释语言直接翻译成CPU或GPU可执行的机器码
 Cython
 Numba
 
 1）使用jit加速Python低效的for语句：
-numba不支持list comprehensions
+numba不支持list comprehensions，但支持dict, set or generator comprehensions
 import numba as nb
 @nb.jit(nopython=True)
 
-2) 使用vectorize实现numpy的ufunc功能:
+2) 使用vectorize实现numpy的ufunc功能: vectorize装饰器将函数向量化，变成类似NumPy函数一样，直接处理矩阵和张量
 @nb.vectorize(nopython=True)
 vectorize下的函数所接受的参数都是一个个的数，而不是整个数组
 可以显示地定义函数的参数类型：
@@ -39,4 +46,27 @@ def make_multi_task(kernel, n_thread):
         return result
      return func
      
-     
+4）Numba的使用场景：
+只支持了Python原生函数和部分NumPy函数
+pandas是更高层次的封装，Numba其实不能理解它里面做了什么，所以无法对其加速
+一些机器学习框架，如scikit-learn, tensorflow, pytorch等已经做了大量的优化，不适合再使用Numba做加速
+不支持：try ... except 异常处理、with 语句、yield from
+*args can only be a tuple, not a list
+explicit **kwargs are not supported
+
+5）还可以使用GPU进行加速，目前支持英伟达的CUDA和AMD的ROC
+
+6）如果希望JIT能针对所有类型的参数进行运算，可以使用autojit，否则JIT所产生的函数只能针对指定类型的参数进行运算：
+from numba import autojit
+@autojit
+
+6) 使用product扁平化多层嵌套循环：
+from itertools import product
+
+def find_twelve_v2(num_list1, num_list2, num_list3):
+        for num1, num2, num3 in product(num_list1, num_list2, num_list3):
+                if num1 + num2 + num3 == 12:
+                        return num1, num2, num3
+                        
+                        
+
