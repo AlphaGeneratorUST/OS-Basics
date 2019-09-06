@@ -98,7 +98,7 @@ def func_nb(dt1):
 
 start_time = time.time()
 for i_time in range(100):
-    func_nb(dt1=dt.copy())
+    func_nb(dt1=dt.copy())    # Numba cannot figure out global ndarray, we need transfer the copy of the global ndarray and rename it
 print("time=%.6f" % (time.time() - start_time))
 
 dt_pos = func_nb(dt1=dt.copy())
