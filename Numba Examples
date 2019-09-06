@@ -100,3 +100,13 @@ start_time = time.time()
 for i_time in range(100):
     func_nb(dt1=dt.copy())
 print("time=%.6f" % (time.time() - start_time))
+
+dt_pos = func_nb(dt1=dt.copy())
+print(dt_pos)
+
+df['pos'] = dt_pos
+df['marketReturn'] = np.log(df['close']/df['close'].shift(1))
+df['strategyReturn'] = df['marketReturn'] * df['pos']
+print(df.head(100))
+
+df['strategyReturn'].cumsum().plot()
