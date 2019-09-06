@@ -1,0 +1,102 @@
+import sys
+sys.path.insert(0, "C:/Users/huobi/quant")
+
+import warnings
+warnings.filterwarnings('ignore')
+
+from IPython.display import Markdown
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+%matplotlib inline
+
+import talib
+pd.set_option('display.max_rows', None)    # Display all the pandas rows
+
+import datetime
+import numba as nb
+import timeit
+import time
+
+
+data = pd.read_csv("############################.csv", index_col='id', nrows=2000)
+df = data[['close', 'vol']]
+print(df.head())
+
+MA5 = talib.SMA(np.array(df['close']), timeperiod=5)
+MA20 = talib.SMA(np.array(df['close']), timeperiod=20)
+
+df['ma5'] = MA5
+df['ma20'] = MA20
+temp = np.zeros(len(df))
+df['position'] = pd.Series(temp, index=df.index)
+# LE_Price = 0    # DO NOT define global variables easily
+# SE_Price = 0    # DO NOT define global variables easily
+print(df.head(30))
+print(df['position'].values)
+
+df.reset_index(level=0, inplace=True)  # 将index时间戳变成column，以便转换成ndarray时可见
+df3 = df[['id', 'close', 'ma5', 'ma20', 'position']]
+print(df3.head())
+
+dt = df3.replace(np.nan,0).values[:,1:]   # 小心处理NaN值变成0，Numba处理多维数组内的数据类型需要相同
+print(dt)
+print(type(dt))   # 此时dtype为object，Numba不支持此类型
+len_dt = len(dt)
+print(len_dt)
+print(dt.dtype)
+dt= dt.astype(np.float64)  # 将ndarray内的元素类型统一转换为float64
+print(dt)
+print(dt.dtype)
+
+# MA Strategy
+# start = datetime.datetime.now()
+# dt1 = dt.copy()
+@nb.jit(nopython=True, cache=True)
+def func_nb(dt1):
+    LE_Price = 0
+    SE_Price = 0
+    for i in range(len(dt1)):
+        # Long Entry
+        if (dt1[i,3] == 0) and (dt1[i,1] - dt1[i,2] > 0.5):
+            dt1[i,3] = 1
+            LE_Price = dt1[i,0]
+
+        # Long Exit
+        if (dt1[i,3] == 1) and (dt1[i,1] - dt1[i,2] < -0.5):
+            dt1[i,3] = 0
+            LE_Price = 0
+            SE_Price = 0
+
+        # Long Stoploss
+        if (dt1[i,3] == 1) and (dt1[i,0] - LE_Price < -0.3):
+            dt1[i,3] = 0
+            LE_Price = 0
+            SE_Price = 0
+
+        # Short Entry
+        if (dt1[i,3] == 0) and (dt1[i,1] - dt1[i,2] < -0.5):
+            dt1[i,3] = -1.
+            SE_Price = dt[i,0]
+
+        # Short Exit
+        if (dt1[i,3] == -1) and (dt1[i,1] - dt1[i,2] > 0.5):
+            dt1[i,3] = 0.
+            LE_Price = 0
+            SE_Price = 0
+
+        # Short Stoploss
+        if (dt1[i,3] == -1) and (dt1[i,0] - SE_Price > 0.3):
+            dt1[i,3] = 0
+            LE_Price = 0
+            SE_Price = 0
+        
+# runTime = datetime.datetime.now() - start
+# print(runTime)
+# %timeit func_nb()
+
+start_time = time.time()
+for i_time in range(100):
+    func_nb(dt1=dt.copy())
+print("time=%.6f" % (time.time() - start_time))
