@@ -1,0 +1,4 @@
+git remote -v
+git add .
+git commit -m "darren update"
+git push -u origin master
