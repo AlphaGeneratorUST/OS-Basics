@@ -267,7 +267,19 @@ $ git stash pop
 $ git archive
 
 
+11）配置全局用户Name和Email:
+$ git config --global user.name "Your Name"
+$ git config --global user.email "email@example.com"
+
+
 git remote -v
 git add .
 git commit -m "darren update"
 git push -u origin master
+git init
+git add <file>
+git commit
+git commit -m "提交说明"
+git status
+git diff <file>
+git log
