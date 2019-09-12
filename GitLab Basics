@@ -283,3 +283,9 @@ git commit -m "提交说明"
 git status
 git diff <file>
 git log
+
+增加新文件：
+git pull
+git add resample_data.py
+git commit -m "darren update"
+git push -u origin master
