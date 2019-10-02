@@ -295,3 +295,10 @@ git init
 git remote add origin http://13.114.55.147:81/Shawn/strategy_trading
 git pull origin master
 
+本地和远程都有改动，需要先将本地改动放到一边
+git diff StrategyTrading/Example/customizedCTAFramework.py
+git stash
+git pull origin master
+git stash pop
+
+
