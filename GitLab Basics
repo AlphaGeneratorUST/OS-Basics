@@ -289,3 +289,9 @@ git pull
 git add resample_data.py
 git commit -m "darren update"
 git push -u origin master
+
+pull production env:
+git init
+git remote add origin http://13.114.55.147:81/Shawn/strategy_trading
+git pull
+
