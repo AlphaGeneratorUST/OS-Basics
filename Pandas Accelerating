@@ -1,0 +1,105 @@
+1) 数据读取的优化：
+读入csv，之后转化为pkl和hdf
+
+import pandas as pd
+ #读取csv
+ df = pd.read_csv('xxx.csv')
+ 
+ #pkl格式
+ df.to_pickle('xxx.pkl') #格式另存
+ df = pd.read_pickle('xxx.pkl') #读取
+ 
+ #hdf格式
+df.to_hdf('xxx.hdf','df') #格式另存
+df = pd.read_hdf('xxx.hdf','df') #读取
+
+2）进行聚合操作时的优化：
+在使用 agg 和 transform进行操作时，尽量使用Python的内置函数
+
+agg + Python内置函数
+%%timeit
+df.groupby("ProductCD")["TransactionAmt"].agg(sum)
+
+agg + 非内置函数
+%%timeit
+df.groupby("ProductCD")["TransactionAmt"].agg(lambda x:x.sum())
+
+transform + Python内置函数
+%%timeit
+df.groupby("ProductCD")["TransactionAmt"].transform(sum)
+
+transform + 非内置函数
+%%timeit
+df.groupby("ProductCD")["TransactionAmt"].transform(lambda x:x.sum())
+
+3）对数据进行逐行操作时的优化：
+尽量向量化运算
+#编写求得相应结果的函数
+def get_cost(kwh, hour):
+    if 0 <= hour < 7:
+        rate = 0.6
+    elif 7 <= hour < 17:
+        rate = 0.68
+    elif 17 <= hour < 24:
+        rate = 0.75
+    else:
+        raise ValueError(f'Invalid hour: {hour}')
+    return rate * kwh
+
+#方法一：简单循环
+def loop(df):
+    cost_list = []
+    for i in range(len(df)):
+        energy_used = df.iloc[i]['energy_kwh']
+        hour = df.iloc[i]['date_time'].hour
+        energy_cost = get_cost(energy_used, hour)
+        cost_list.append(energy_cost)
+    df['cost'] = cost_list
+
+#方法二：apply方法
+def apply_method(df):
+     df['cost'] = df.apply(
+         lambda row: get_cost(
+             kwh=row['energy_kwh'],
+             hour=row['date_time'].hour),
+         axis=1)
+
+#方法三：采用isin筛选出各时段，分段处理
+df.set_index('date_time', inplace=True)
+def isin_method(df):
+    peak_hours = df.index.hour.isin(range(17, 24))
+    simple_hours = df.index.hour.isin(range(7, 17))
+    off_peak_hours = df.index.hour.isin(range(0, 7))
+
+    df.loc[peak_hours, 'cost'] = df.loc[peak_hours, 'energy_kwh'] * 0.75
+    df.loc[simple_hours,'cost'] = df.loc[simple_hours, 'energy_kwh'] * 0.68
+    df.loc[off_peak_hours,'cost'] = df.loc[off_peak_hours, 'energy_kwh'] * 0.6
+
+4）使用numba进行加速：
+数据处理过程涉及到了大量的数值计算，那么使用numba可以大大加快代码的运行效率
+import numba
+
+@numba.vectorize
+def f_with_numba(x): 
+    return x * 2
+
+def f_without_numba(x): 
+    return x * 2
+
+#方法一：apply逐行操作
+df["double_energy"] = df.energy_kwh.apply(f_without_numba)
+
+#方法二：向量化运行
+df["double_energy"] = df.energy_kwh*2
+
+#方法三：运用numba加速
+#需要以numpy数组的形式传入, 否则会报错
+df["double_energy"] = f_with_numba(df.energy_kwh.to_numpy())
+
+
+
+
+
+
+
+
