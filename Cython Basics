@@ -129,85 +129,108 @@ from Cython.Build import cythonize
 
 setup(name="nbody", ext_modules=cythonize("nbody.pyx"))
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+cdef class Particle:
+    """Simple Particle extension type."""
+    cdef public double mass
+    cdef readonly double position
+    cdef double velocity
+    # ...
+
+cdef class Matrix:
+    cdef:
+        unsigned int nrows, ncols
+        double *_matrix
+    def __cinit__(self, nr, nc):
+        self.nrows = nr
+        self.ncols = nc
+        self._matrix = <double*>malloc(nr * nc * sizeof(double))
+        if self._matrix == NULL:
+            raise MemoryError()
+
+cdef class Particle:
+    """Simple Particle extension type."""
+    cdef double mass, position, velocity
+    # ...
+    cpdef double get_momentum(self):
+        return self.mass * self.velocity
+
+def add_momentums_typed(list particles):
+    """Returns the sum of the particle momentums."""
+    cdef:
+        double total_mom = 0.0
+        Particle particle
+    for particle in particles:
+        total_mom += particle.get_momentum()
+    return total_mom
+
+cdef class CParticle(Particle):
+    cdef double momentum
+    def __init__(self, m, p, v):
+        super(CParticle, self).__init__(m, p, v)
+        self.momentum = self.mass * self.velocity
+    cpdef double get_momentum(self):
+        return self.momentum
+
+from libc.stdlib cimport rand, srand, qsort, malloc, free
+cdef int *a = <int*>malloc(10 * sizeof(int))
+
+from libc.string cimport memcpy as c_memcpy
+
+from libcpp.vector cimport vector
+cdef vector[int] *vi = new vector[int](10)
+
+from libc.math cimport sin as csin
+from math import sin as pysin
+
+cdef extern from "header.h":
+    double M_PI
+    float MAX(float a, float b)
+    double hypot(double x, double y)
+    ctypedef int integral
+    ctypedef double real
+    void func(integral a, integral b, real c)
+    real *func_arrays(integral[] i, integral[][10] j, real **k)
+    
+from distutils.core import setup, Extension
+from Cython.Build import cythonize
+ext = Extension("mt_random",
+sources=["mt_random.pyx", "mt19937ar.c"])
+setup(name="mersenne_random", ext_modules = cythonize([ext]))
+
+from distutils.core import setup, Extension
+from Cython.Build import cythonize
+ext = Extension("RNG",
+sources=["RNG.pyx", "mt19937.cpp"],
+
+from cython cimport boundscheck, wraparound
+@boundscheck(False)
+@wraparound(False)
+def calc_julia(...):
+    # ...
+
+from distutils.core import setup
+from Cython.Build import cythonize
+setup(name="julia", ext_modules=cythonize("julia.pyx"))
+
+
+
+from cython.parallel cimport prange
+
+def calc_julia(...):
+    # ...
+    with nogil:
+        for i in prange(resolution + 1):
+            real = -bound + i * step
+            for j in range(resolution + 1):
+                # ...
+    # ...
+
+def calc_julia(...):
+    # ...
+    for i in prange(resolution + 1, nogil=True):
+        real = -bound + i * step
+        for j in range(resolution + 1):
+            # ...
 
 
 
