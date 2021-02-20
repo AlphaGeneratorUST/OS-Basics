@@ -263,6 +263,17 @@ lds = Extension(name = "test_solution", sources=["test_solution.pyx", "test.c"])
 
 setup(ext_modules = cythonize([ld, lds]))
 
+## Cython help
+cython -h
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+
+
+## IPython run .py
+%run -p test.py
+
+
 
 
 
