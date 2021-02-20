@@ -249,6 +249,7 @@ def cyfib(int n):
         a, b = a+b, a
     return a
     
+python set_up.py build_ext --inplace --force --compiler=mingw32
 
 
 
