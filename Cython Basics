@@ -171,6 +171,7 @@ cdef class CParticle(Particle):
     cpdef double get_momentum(self):
         return self.momentum
 
+
 from libc.stdlib cimport rand, srand, qsort, malloc, free
 cdef int *a = <int*>malloc(10 * sizeof(int))
 
@@ -193,14 +194,12 @@ cdef extern from "header.h":
     
 from distutils.core import setup, Extension
 from Cython.Build import cythonize
-ext = Extension("mt_random",
-sources=["mt_random.pyx", "mt19937ar.c"])
+ext = Extension("mt_random", sources=["mt_random.pyx", "mt19937ar.c"])
 setup(name="mersenne_random", ext_modules = cythonize([ext]))
 
 from distutils.core import setup, Extension
 from Cython.Build import cythonize
-ext = Extension("RNG",
-sources=["RNG.pyx", "mt19937.cpp"],
+ext = Extension("RNG", sources=["RNG.pyx", "mt19937.cpp"])
 
 from cython cimport boundscheck, wraparound
 @boundscheck(False)
@@ -213,7 +212,7 @@ from Cython.Build import cythonize
 setup(name="julia", ext_modules=cythonize("julia.pyx"))
 
 
-
+## parallel
 from cython.parallel cimport prange
 
 def calc_julia(...):
@@ -250,6 +249,36 @@ def cyfib(int n):
     return a
     
 python set_up.py build_ext --inplace --force --compiler=mingw32
+python set_up.py build_ext -if -c mingw32
+
+cython -a hamming_cython_solution.pyx
+
+
+## import externel c
+from distutils.core import setup, Extension
+from Cython.Build import cythonize
+
+ld = Extension(name = "test_cython", sources = ["test_cython.pyx", "test.c"])
+lds = Extension(name = "test_solution", sources=["test_solution.pyx", "test.c"])
+
+setup(ext_modules = cythonize([ld, lds]))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
