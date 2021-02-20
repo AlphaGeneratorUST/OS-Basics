@@ -232,7 +232,11 @@ def calc_julia(...):
         for j in range(resolution + 1):
             # ...
 
+import pyximport
+pyximport.install()
 
+from fib import fib
+print(fib(10))
 
 
 
