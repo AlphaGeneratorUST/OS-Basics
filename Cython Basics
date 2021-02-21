@@ -309,7 +309,12 @@ cdef:
     cpython.array.array aa = array.array('i', [1,2,3])
     
 
-
+cpdef int func(int i) except *:
+    pass
+    
+cpdef int func(int i) except -1:
+    # ...
+    raise ValueError("...")
 
 
 
