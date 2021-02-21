@@ -317,32 +317,10 @@ cpdef int func(int i) except -1:
     raise ValueError("...")
 
 
+%%prun
+reverse(list(range(1000)))
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+cython: profile = True
 
 
 
