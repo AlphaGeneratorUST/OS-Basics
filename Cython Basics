@@ -270,8 +270,72 @@ cython -h
 @cython.wraparound(False)
 
 
-## IPython run .py
+## IPython run.py
+%load_ext Cython
+
+%%cython
+def first_cython_func(int i):
+    return i * 2
+    
+%%cython -a
+def first_cython_func(int i):
+    return i * 2
+
+%%cython -n first_cython_func
+
 %run -p test.py
+
+%%cython?
+
+!ls ~/.ipython/cython
+!head ~/test/...
+
+from dis import dis
+dis(foo)
+
+%timeit foo(1, 2)
+
+import datetime
+cimport cpython.datetime
+
+import array
+cimport cpython.array
+
+cdef:
+    list lst = [1]
+    dict dd = {'a':'b'}
+    set ss = set([1])
+    cpython.datetime.datetime dt = datetime.datetime.now()
+    cpython.array.array aa = array.array('i', [1,2,3])
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
