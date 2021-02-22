@@ -323,6 +323,13 @@ reverse(list(range(1000)))
 cython: profile = True
 
 
+import pyximport; pyximport.install()
+1) Use pyximport;
+2) Extension mudule;
+3) Define types
+
+
+
 
 
 
