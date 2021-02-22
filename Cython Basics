@@ -329,19 +329,9 @@ import pyximport; pyximport.install()
 3) Define types
 
 
+import timeit
 
-
-
-
-
-
-
-
-
-
-
-
-
+cy = timeit.timeit('example_cy.test(5)', setup='import example_cy', number=100)
 
 
 
