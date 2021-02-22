@@ -266,6 +266,7 @@ setup(ext_modules = cythonize([ld, lds]))
 ## Cython help
 cython -h
 
+cimport cython
 @cython.boundscheck(False)
 @cython.wraparound(False)
 
