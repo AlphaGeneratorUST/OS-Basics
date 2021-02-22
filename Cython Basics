@@ -281,8 +281,11 @@ def first_cython_func(int i):
 import numpy as np
 cimport numpy as np
 
-from libc.math import exp
-from libc.stdlib import rand
+from libc.math cimport exp
+from libc.stdlib cimport rand
+cdef extern from "limits.h":
+    int RAND_MAX
+
 
 def first_cython_func(int i):
     return i * 2
