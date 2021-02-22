@@ -278,6 +278,12 @@ def first_cython_func(int i):
     return i * 2
     
 %%cython -a
+import numpy as np
+cimport numpy as np
+
+from libc.math import exp
+from libc.stdlib import rand
+
 def first_cython_func(int i):
     return i * 2
 
