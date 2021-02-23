@@ -273,6 +273,7 @@ cimport cython
 
 ## IPython run.py
 %load_ext Cython
+%load_ext cythonmagic
 
 %%cython
 def first_cython_func(int i):
